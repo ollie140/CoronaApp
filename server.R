@@ -1,7 +1,10 @@
 library(dplyr)
 library(tidyr)
 
+## data is gathered from github
 baseURL = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series"
+
+## manually set a font and font size for the plots
 f1 = list(family="Courier New, monospace", size=12, 
           color="rgb(30,30,30)") ## font
 
@@ -22,9 +25,9 @@ loadData = function(fileName, columnName) {
       mutate(date=as.Date(date, format = "%m/%d/%y"),
         `Province/State` = if_else(`Province/State` == "", "<all>", `Province/State`)
       )
-    save(data, file=fileName)  
+    save(data, file = fileName)  
   } else {
-    load(file=fileName)
+    load(file = fileName)
   }
   return(data)
 }
@@ -38,7 +41,7 @@ allData =
     "time_series_covid19_recovered_global.csv","CumRecovered"))
 
 server = function(input, output, session) {
-  ## ...
+  
   data = reactive({
     d = allData %>%
       filter(`Country/Region` == input$country)
@@ -48,14 +51,14 @@ server = function(input, output, session) {
     } else {
       d = d %>% 
         group_by(date) %>% 
-        summarise_if(is.numeric, sum, na.rm=TRUE)
+        summarise_if(is.numeric, sum, na.rm = TRUE)
     }
     d %>%
       mutate(
-        dateStr = format(date, format="%b %d, %Y"),
-        NewConfirmed=CumConfirmed - lag(CumConfirmed, default=0),
-        NewRecovered=CumRecovered - lag(CumRecovered, default=0),
-        NewDeaths=CumDeaths - lag(CumDeaths, default=0)
+        dateStr = format(date, format = "%b %d, %Y"),
+        NewConfirmed = CumConfirmed - lag(CumConfirmed, default = 0),
+        NewRecovered = CumRecovered - lag(CumRecovered, default = 0),
+        NewDeaths = CumDeaths - lag(CumDeaths, default = 0)
       )
   })
   
@@ -65,7 +68,7 @@ server = function(input, output, session) {
       pull(`Province/State`)
     states = c("<all>", sort(unique(states)))
     updateSelectInput(session, "state", choices = states, 
-                      selected=states[1])
+                      selected = states[1])
   })
   
   countries = sort(unique(allData$`Country/Region`))
