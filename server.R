@@ -99,7 +99,7 @@ server = function(input, output, session) {
       for(metric in input$metrics) 
         plt = plt %>%
         add_trace(
-          x = ~date, y = data[[paste0(varPrefix, metric)]],type = 'bar', 
+          x = ~date, y = data[[paste0(varPrefix, metric)]], type = 'bar', 
           name = paste(legendPrefix, metric, "Cases"),
           marker = list(
             color = switch(metric, 
@@ -115,7 +115,7 @@ server = function(input, output, session) {
   
   fc <- reactive({
     forecastData <- data()
-    forecastDataWeekly <- ts(forecastData[,8], frequency = 7)
+    forecastDataWeekly <- ts(forecastData[,2], frequency = 7) ##cumulative cases weekly
     fit <- ets(forecastDataWeekly)
     forecast <- forecast(fit)
     forecast
