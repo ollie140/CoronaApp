@@ -47,7 +47,7 @@ server = function(input, output, session) {
       filter(`Country/Region` == input$country)
     if(input$state != "<all>") {
       d = d %>% 
-        filter(`Province/State` == input$state) 
+        filter(`Province/State` == input$state)
     } else {
       d = d %>% 
         group_by(date) %>% 
@@ -84,11 +84,11 @@ server = function(input, output, session) {
       data = data()
       plt = data %>% 
         plot_ly() %>%
-        config(displayModeBar=FALSE) %>%
+        config(displayModeBar = FALSE) %>%
         layout(
-          barmode='group', 
+          barmode = 'group', 
           xaxis = list(
-            title = "", tickangle=-90, type='category', 
+            title = "", tickangle = -90, type='category', 
             ticktext = as.list(data$dateStr), 
             tickvals = as.list(data$date)), 
           yaxis = list(title=yaxisTitle),
@@ -98,13 +98,13 @@ server = function(input, output, session) {
       for(metric in input$metrics) 
         plt = plt %>%
         add_trace(
-          x = ~date, y = data[[paste0(varPrefix, metric)]],type='bar', 
+          x = ~date, y = data[[paste0(varPrefix, metric)]],type = 'bar', 
           name = paste(legendPrefix, metric, "Cases"),
           marker = list(
             color = switch(metric, 
-                         Deaths='rgb(200,30,30)', 
-                         Recovered='rgb(30,200,30)', 
-                         Confirmed='rgb(100,140,240)'),
+                         Deaths = 'rgb(200,30,30)', 
+                         Recovered = 'rgb(30,200,30)', 
+                         Confirmed = 'rgb(100,140,240)'),
             line = list(color='rgb(8,48,107)', width=1.0)
           )
         )
@@ -114,7 +114,7 @@ server = function(input, output, session) {
   
   ## plot the data on renderBarPlot defined above
   output$dailyMetrics = renderBarPlot(
-    "New", legendPrefix="New", yaxisTitle="New Cases per Day")
+    "New", legendPrefix = "New", yaxisTitle = "New Cases per Day")
   output$cumulatedMetrics = renderBarPlot(
-    "Cum", legendPrefix="Cumulated", yaxisTitle="Cumulated Cases")
+    "Cum", legendPrefix = "Cumulated", yaxisTitle = "Cumulated Cases")
 }
