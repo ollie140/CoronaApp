@@ -1,20 +1,21 @@
 library(dplyr)
 library(tidyr)
+library(forecast)
 
 ## data is gathered from github
-baseURL = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series"
+baseURL <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series"
 
 ## manually set a font and font size for the plots
-f1 = list(family="Courier New, monospace", size=12, 
+f1 <- list(family="Courier New, monospace", size=12, 
           color="rgb(30,30,30)") ## font
 
-minutesSinceLastUpdate = function(fileName) {
+minutesSinceLastUpdate <- function(fileName) {
   ## this function returns the minutes since the last update of a file
   (as.numeric(as.POSIXlt(Sys.time())) -  
      as.numeric(file.info(fileName)$ctime)) / 60
 }
 
-loadData = function(fileName, columnName) {
+loadData <- function(fileName, columnName) {
   ## this function returns the data (number of confirmed cases by day and country)
   if(!file.exists(fileName) || 
      minutesSinceLastUpdate(fileName) > 10) {
@@ -32,7 +33,7 @@ loadData = function(fileName, columnName) {
   return(data)
 }
 
-allData = 
+allData <- 
   loadData(
     "time_series_covid19_confirmed_global.csv", "CumConfirmed") %>%
   inner_join(loadData(
@@ -42,8 +43,8 @@ allData =
 
 server = function(input, output, session) {
   
-  data = reactive({
-    d = allData %>%
+  data <- reactive({
+    d <- allData %>%
       filter(`Country/Region` == input$country)
     if(input$state != "<all>") {
       d = d %>% 
@@ -91,8 +92,8 @@ server = function(input, output, session) {
             title = "", tickangle = -90, type='category', 
             ticktext = as.list(data$dateStr), 
             tickvals = as.list(data$date)), 
-          yaxis = list(title=yaxisTitle),
-          legend = list(x=0.1, y=0.9,bgcolor='rgba(240,240,240,0.5)'),
+          yaxis = list(title = yaxisTitle),
+          legend = list(x = 0.1, y = 0.9,bgcolor='rgba(240,240,240,0.5)'),
           font = f1
         )
       for(metric in input$metrics) 
@@ -105,16 +106,26 @@ server = function(input, output, session) {
                          Deaths = 'rgb(200,30,30)', 
                          Recovered = 'rgb(30,200,30)', 
                          Confirmed = 'rgb(100,140,240)'),
-            line = list(color='rgb(8,48,107)', width=1.0)
+            line = list(color='rgb(8,48,107)', width = 1.0)
           )
         )
       plt
     })
   }
   
+  fc <- reactive({
+    forecastData <- data()
+    forecastDataWeekly <- ts(forecastData[,8], frequency = 7)
+    fit <- ets(forecastDataWeekly)
+    forecast <- forecast(fit)
+    forecast
+  })
+  
   ## plot the data on renderBarPlot defined above
   output$dailyMetrics = renderBarPlot(
     "New", legendPrefix = "New", yaxisTitle = "New Cases per Day")
   output$cumulatedMetrics = renderBarPlot(
     "Cum", legendPrefix = "Cumulated", yaxisTitle = "Cumulated Cases")
+  
+  output$Forecasting = renderPlot(plot(fc()))
 }

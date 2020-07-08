@@ -36,7 +36,8 @@ shinyUI(fluidPage(
   ),
   
   fluidRow(plotlyOutput("dailyMetrics")),
-  fluidRow(plotlyOutput("cumulatedMetrics"))
+  fluidRow(plotlyOutput("cumulatedMetrics")),
+  fluidRow(plotOutput("Forecasting"))
   
 ))
 
