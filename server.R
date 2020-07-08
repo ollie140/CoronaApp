@@ -115,10 +115,10 @@ server = function(input, output, session) {
   
   fc <- reactive({
     forecastData <- data()
-    forecastDataWeekly <- ts(forecastData[,2], frequency = 7) ##cumulative cases weekly
-    fit <- ets(forecastDataWeekly)
-    forecast <- forecast(fit)
-    forecast
+    forecastCumCases <- ts(forecastData[,2], frequency = 7) ##cumulative cases weekly
+    fitCumCases <- ets(forecastCumCases)
+    forecastCumCases <- forecast(fitCumCases)
+    forecastCumCases
   })
   
   ## plot the data on renderBarPlot defined above
